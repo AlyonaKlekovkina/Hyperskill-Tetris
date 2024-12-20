@@ -5,22 +5,19 @@ import numpy as np
 def interpret_command_input():
     inp = input()
     if inp == 'O':
-        return [[5, 6, 9, 10]], (len([[5, 6, 9, 10]]) - 1)
+        return [[5, 6, 9, 10]]
     if inp == 'I':
-        return [[1, 5, 9, 13], [4, 5, 6, 7]], (len([[1, 5, 9, 13], [4, 5, 6, 7]]) - 1)
+        return [[1, 5, 9, 13], [4, 5, 6, 7]]
     if inp == 'S':
-        return [[5, 6, 8, 9], [5, 9, 10, 14]], (len([[6, 5, 9, 8], [5, 9, 10, 14]]) - 1)
+        return [[5, 6, 8, 9], [5, 9, 10, 14]]
     if inp == 'Z':
-        return [[4, 5, 9, 10], [2, 5, 6, 9]], (len([[4, 5, 9, 10], [2, 5, 6, 9]]) - 1)
+        return [[4, 5, 9, 10], [2, 5, 6, 9]]
     if inp == 'L':
-        return [[1, 5, 9, 10], [2, 4, 5, 6], [1, 2, 6, 10], [4, 5, 6, 8]], (
-                    len([[1, 5, 9, 10], [2, 4, 5, 6], [1, 2, 6, 10], [4, 5, 6, 8]]) - 1)
+        return [[1, 5, 9, 10], [2, 4, 5, 6], [1, 2, 6, 10], [4, 5, 6, 8]]
     if inp == 'J':
-        return [[2, 6, 9, 10], [4, 5, 6, 10], [1, 2, 5, 9], [0, 4, 5, 6]], (
-                    len([[2, 6, 9, 10], [4, 5, 6, 10], [1, 2, 5, 9], [0, 4, 5, 6]]) - 1)
+        return [[2, 6, 9, 10], [4, 5, 6, 10], [1, 2, 5, 9], [0, 4, 5, 6]]
     if inp == 'T':
-        return [[1, 4, 5, 6], [1, 4, 5, 9], [4, 5, 6, 9], [1, 5, 6, 9]], (
-                    len([[1, 4, 5, 6], [1, 4, 5, 9], [4, 5, 6, 9], [1, 5, 6, 9]]) - 1)
+        return [[1, 4, 5, 6], [1, 4, 5, 9], [4, 5, 6, 9], [1, 5, 6, 9]]
 
 
 def create_grid():
@@ -83,5 +80,5 @@ def print_piece(length):
 empty_grid_numbers = create_grid()
 shape_and_len = interpret_command_input()
 shape = shape_and_len[0]
-length = shape_and_len[1]
+length = len(shape) - 1
 print_piece(length)
