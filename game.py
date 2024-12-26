@@ -89,34 +89,61 @@ def start_position(width, height):
     print()
 
 
-def make_a_move(shape):
+def make_a_move(shape, width, height):
     global iteration
-    commands = ['left', 'right', 'down', 'rotate']
     piece = shape[0]
-    count = 1
+    count = 0
     move_left = 0
     move_right = 0
     iteration = 1
+    piece_to_rotate = shape[count]
+    #step_to_rotate =  10 + move_left + move_right
     while True:
         how_to_move = input()
         if how_to_move == 'left':
-            step = 9
+            if (piece[-1] + 10) > (width * height):
+                step = 0
+            elif piece[0] % 10 == 0 and (piece[-1] + 10) > (width * height):
+                step = 0
+            elif piece[0] % 10 == 0:
+                step = 10
+            else:
+                step = 9
             piece = move_left_right_down(step, piece)
-            move_left += 1
+            if step != 10:
+                move_left += 1
         if how_to_move == 'right':
-            step = 11
+            if (piece[-1] + 10) > (width * height):
+                step = 0
+            elif piece[-1] % 10 == 9 and (piece[-1] + 10) > (width * height):
+                step = 0
+            elif piece[-1] % 10 == 9:
+                step = 10
+            else:
+                step = 11
             piece = move_left_right_down(step, piece)
-            move_right += 1
+            if step != 10:
+                move_right += 1
         if how_to_move == 'down':
-            step = 10
+            if (piece[-1] + 10) > (width * height):
+                step = 0
+            else:
+                step = 10
             piece = move_left_right_down(step, piece)
         if how_to_move == 'rotate':
-            step = ((10 * iteration) - move_left) + move_right
-            piece = move_left_right_down(step, shape[count])
-            if count < len(shape) - 1:
+            step = 0
+            if (count < len(shape) - 1) and ((piece_to_rotate[-1] + iteration * 10) < (width * height)):
                 count += 1
+                step = ((10 * iteration) - move_left) + move_right
+                piece_to_rotate = shape[count]
             elif count == len(shape) - 1:
                 count = 0
+                step = ((10 * iteration) - move_left) + move_right
+                piece_to_rotate = shape[count]
+            elif ((piece_to_rotate[-1] + iteration * 10) >= (width * height)):
+                step = ((10 * (height - 2)) - move_left) + move_right
+                piece_to_rotate = shape[count]
+            piece = move_left_right_down(step, piece_to_rotate)
         if how_to_move == 'exit':
             break
 
@@ -142,5 +169,5 @@ board_width = int(dimensions[0])
 board_height = int(dimensions[1])
 empty_grid_numbers = create_grid(board_width, board_height)
 start_position(board_width, board_height)
-make_a_move(shape)
+make_a_move(shape, board_width, board_height)
 
