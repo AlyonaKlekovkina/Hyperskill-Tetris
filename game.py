@@ -97,13 +97,10 @@ def make_a_move(shape, width, height):
     move_right = 0
     iteration = 1
     piece_to_rotate = shape[count]
-    #step_to_rotate =  10 + move_left + move_right
     while True:
         how_to_move = input()
         if how_to_move == 'left':
             if (piece[-1] + 10) > (width * height):
-                step = 0
-            elif piece[0] % 10 == 0 and (piece[-1] + 10) > (width * height):
                 step = 0
             elif piece[0] % 10 == 0:
                 step = 10
@@ -114,8 +111,6 @@ def make_a_move(shape, width, height):
                 move_left += 1
         if how_to_move == 'right':
             if (piece[-1] + 10) > (width * height):
-                step = 0
-            elif piece[-1] % 10 == 9 and (piece[-1] + 10) > (width * height):
                 step = 0
             elif piece[-1] % 10 == 9:
                 step = 10
@@ -140,7 +135,7 @@ def make_a_move(shape, width, height):
                 count = 0
                 step = ((10 * iteration) - move_left) + move_right
                 piece_to_rotate = shape[count]
-            elif ((piece_to_rotate[-1] + iteration * 10) >= (width * height)):
+            elif (piece_to_rotate[-1] + iteration * 10) >= (width * height):
                 step = ((10 * (height - 2)) - move_left) + move_right
                 piece_to_rotate = shape[count]
             piece = move_left_right_down(step, piece_to_rotate)
@@ -170,4 +165,3 @@ board_height = int(dimensions[1])
 empty_grid_numbers = create_grid(board_width, board_height)
 start_position(board_width, board_height)
 make_a_move(shape, board_width, board_height)
-
