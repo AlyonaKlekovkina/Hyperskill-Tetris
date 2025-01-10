@@ -2,9 +2,21 @@
 import numpy as np
 
 
-def interpret_command_input():
+def create_first_grid(width, height):
+    outer = []
+    for i in range(height):
+        inner = []
+        for j in range(width):
+            inner.append('-')
+        outer.append(inner)
+    for j in outer:
+        print(" ".join(np.array(j)))
+    print()
+    return outer
+
+
+def interpret_input_piece():
     shape_input = input()
-    dimentions_of_the_grid = input()
     shapes = {
         'O': [[4, 5, 14, 15]],
         'I': [[4, 14, 24, 34], [3, 4, 5, 6]],
@@ -15,153 +27,109 @@ def interpret_command_input():
         'T': [[4, 14, 15, 24], [4, 13, 14, 15], [5, 14, 15, 25], [4, 5, 6, 15]],
     }
     if shape_input in shapes:
-        return shapes[shape_input], dimentions_of_the_grid.split()
+        return shapes[shape_input]
     else:
         raise ValueError("Invalid input")
 
 
-def create_grid(width, height):
-    count = 0
-    grid = []
-    for i in range(height):
-        row = []
-        for j in range(width):
-            row.append(j + count)
-        count += width
-        grid.append(row)
-    return grid
-
-
-def create_first_grid(width, height):
-    outer = []
-    for i in range(height):
-        inner = []
-        for j in range(width):
-            inner.append('-')
-        outer.append(inner)
-    return outer
-
-
-def create_filled_grid(empty_grid, shaped_piece, row_count):
-    len_count = len(shaped_piece[0]) - 1
+def put_piece_on_grid(grid, piece):
+    grid_row = 0
     piece_count = 0
-    filled_grid = []
-    for i in empty_grid:
+    grid_height = []
+    for i in grid:
         grid_line = []
-        for j in i:
-            if j != shaped_piece[row_count][piece_count]:
-                grid_line.append('-')
-            if j == shaped_piece[row_count][piece_count]:
-                grid_line.append(0)
-                if piece_count < len_count:
+        for j in range(len(i)):
+            if piece[piece_count] == j + grid_row:
+                grid_line.append('0')
+                if piece_count < (len(piece) -1):
                     piece_count += 1
-        filled_grid.append(grid_line)
-    return filled_grid
-
-
-#code from stage 1, not in use in stage 2
-def print_piece(width, height, length):
-    empty_one = create_first_grid(width, height)
-    for k in empty_one:
-        print(" ".join(np.array(k)))
-    print()
-    for i in range(1):
-        count = 0
-        for i in range(5):
-            piece = create_filled_grid(empty_grid_numbers, shape, count)
-            if count != length:
-                count += 1
             else:
-                count = 0
-            for j in piece:
-                print(" ".join(np.array(j)))
-            print()
+                grid_line.append('-')
+        grid_height.append(grid_line)
+        grid_row += 10
+    for j in grid_height:
+        print(" ".join(np.array(j)))
 
 
-def start_position(width, height):
-    empty_grid = create_first_grid(width, height)
-    for k in empty_grid:
-        print(" ".join(np.array(k)))
-    print()
-    first_piece = create_filled_grid(empty_grid_numbers, shape, 0)
-    for i in first_piece:
-        print(" ".join(np.array(i)))
-    print()
+def check_boarders(piece, step, width, height):
+    if (piece[-1] + step + width) >= (width * height):
+        return 'down'
+    elif (piece[0] + step) % width == 0 and (piece[-1] + step) < (width * height):
+        return 'left'
+    elif (piece[-1] + step) % width == (width - 1) and (piece[-1] + step) < (width * height):
+        return 'right'
 
 
-def make_a_move(shape, width, height):
-    global iteration
-    piece = shape[0]
-    count = 0
-    move_left = 0
-    move_right = 0
-    iteration = 1
-    piece_to_rotate = shape[count]
-    while True:
-        how_to_move = input()
-        if how_to_move == 'left':
-            if (piece[-1] + 10) > (width * height):
-                step = 0
-            elif piece[0] % 10 == 0:
-                step = 10
-            else:
-                step = 9
-            piece = move_left_right_down(step, piece)
-            if step != 10:
-                move_left += 1
-        if how_to_move == 'right':
-            if (piece[-1] + 10) > (width * height):
-                step = 0
-            elif piece[-1] % 10 == 9:
-                step = 10
-            else:
-                step = 11
-            piece = move_left_right_down(step, piece)
-            if step != 10:
-                move_right += 1
-        if how_to_move == 'down':
-            if (piece[-1] + 10) > (width * height):
-                step = 0
-            else:
-                step = 10
-            piece = move_left_right_down(step, piece)
-        if how_to_move == 'rotate':
-            step = 0
-            if (count < len(shape) - 1) and ((piece_to_rotate[-1] + iteration * 10) < (width * height)):
-                count += 1
-                step = ((10 * iteration) - move_left) + move_right
-                piece_to_rotate = shape[count]
-            elif count == len(shape) - 1:
-                count = 0
-                step = ((10 * iteration) - move_left) + move_right
-                piece_to_rotate = shape[count]
-            elif (piece_to_rotate[-1] + iteration * 10) >= (width * height):
-                step = ((10 * (height - 2)) - move_left) + move_right
-                piece_to_rotate = shape[count]
-            piece = move_left_right_down(step, piece_to_rotate)
-        if how_to_move == 'exit':
-            break
+def moved_piece(step, shape):
+    moved_piece = []
+    for i in shape:
+        moved_piece.append(i + step)
+    return moved_piece
 
 
-def move_left_right_down(step, piece):
-    global iteration
-    shifted_shape = [[]]
-    for i in piece:
-        shifted_shape[0].append(i + step)
-    shifted_piece = create_filled_grid(empty_grid_numbers, shifted_shape, 0)
-    for m in shifted_piece:
-        print(" ".join(np.array(m)))
-    print()
-    iteration += 1
-    return shifted_shape[0]
-
-
-shape_and_dimensions = interpret_command_input()
-shape = shape_and_dimensions[0]
-length = len(shape) - 1
-dimensions = shape_and_dimensions[1]
+dimensions = input().split()
 board_width = int(dimensions[0])
 board_height = int(dimensions[1])
-empty_grid_numbers = create_grid(board_width, board_height)
-start_position(board_width, board_height)
-make_a_move(shape, board_width, board_height)
+grid = create_first_grid(board_width, board_height)
+
+while True:
+    commands = ['piece', 'rotate', 'left', 'right', 'down', 'break', 'exit']
+    command = input()
+    if command not in commands:
+        print('Such command does not exist')
+    else:
+        if command == 'exit':
+            break
+        elif command == 'piece':
+            step = 0
+            count = 0
+            shape = interpret_input_piece()
+            put_piece_on_grid(grid, shape[count])
+            while True:
+                move = input()
+                checked_boarders = check_boarders(shape[count], step, board_width, board_height)
+                if move == 'left':
+                    if checked_boarders != 'left' and checked_boarders != 'down':
+                        step += board_width - 1
+                        shifted_piece = moved_piece(step, shape[count])
+                        put_piece_on_grid(grid, shifted_piece)
+                    elif checked_boarders == 'left':
+                        step += board_width
+                        shifted_piece = moved_piece(step, shape[count])
+                        put_piece_on_grid(grid, shifted_piece)
+                    if checked_boarders == 'down':
+                        #piece should be printed on grid and program moves to the following piece
+                        break
+                if move == 'right':
+                    if checked_boarders != 'right' and checked_boarders != 'down':
+                        step += board_width + 1
+                        shifted_piece = moved_piece(step, shape[count])
+                        put_piece_on_grid(grid, shifted_piece)
+                    if checked_boarders == 'right':
+                        step += board_width
+                        shifted_piece = moved_piece(step, shape[count])
+                        put_piece_on_grid(grid, shifted_piece)
+                    if checked_boarders == 'down':
+                        #piece should be printed on grid and program moves to the following piece
+                        break
+                elif move == 'down':
+                    if checked_boarders != 'down':
+                        step += board_width
+                        shifted_piece = moved_piece(step, shape[count])
+                        put_piece_on_grid(grid, shifted_piece)
+                    elif checked_boarders == 'down':
+                        # piece should be printed on grid and program moves to the following piece
+                        break
+                elif move == 'rotate':
+                    if (len(shape) - 1) > count:
+                        count += 1
+                    elif (len(shape) - 1) == count:
+                        count = 0
+                    checked_boarders = check_boarders(shape[count], step, board_width, board_height)
+                    if checked_boarders != 'right' and checked_boarders != 'down' and checked_boarders != 'left':
+                        step += board_width
+                        shifted_piece = moved_piece(step, shape[count])
+                        put_piece_on_grid(grid, shifted_piece)
+                    elif checked_boarders == 'down':
+                        # piece should be printed on grid and program moves to the following piece
+                        break
