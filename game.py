@@ -16,7 +16,7 @@ def create_first_grid(width, height):
 
 
 def interpret_input_piece():
-    shape_input = input('Select a shape: ')
+    shape_input = input()
     shapes = {
         'O': [[4, 5, 14, 15]],
         'I': [[4, 14, 24, 34], [3, 4, 5, 6]],
@@ -52,12 +52,14 @@ def put_piece_on_grid(grid, piece):
 
 def violates_bottom_boundary(piece, step, width, height, dropped_pieces):
     all_dropped_positions = sorted(np.concatenate(dropped_pieces)) if dropped_pieces else []
-    for pos in piece:
-        future_pos = pos + step + width
+    for i in piece:
+        future_pos = i + step + width
+        if future_pos < board_width:
+            return 'Game Over!'
         if future_pos >= width * height:
-            return True  # Hits the floor
+            return True
         if future_pos in all_dropped_positions:
-            return True  # Collides with another piece
+            return True
     return False
 
 
@@ -81,7 +83,7 @@ def moved_piece(step, shape):
 
 
 def put_dropped_pieces_on_grid(dropped_pieces, width, height):
-    sorted_pieces = sorted(np.concatenate(dropped_pieces))
+    sorted_pieces = sorted(np.concatenate(dropped_pieces)) if dropped_pieces else []
     grid_row = 0
     piece_count = 0
     grid_height = []
@@ -112,57 +114,104 @@ def merge_two_grids(moving, static):
     return outer
 
 
+def print_out_grid(dropped_pieces, piece_to_place, grid):
+    moving_piece = put_piece_on_grid(grid, piece_to_place)
+    if len(dropped_pieces) == 0:
+        for h in moving_piece:
+            print(" ".join(np.array(h)))
+    else:
+        fallen_pieces = put_dropped_pieces_on_grid(dropped_pieces, board_width, board_height)
+        merged_grid = merge_two_grids(moving_piece, fallen_pieces)
+        for m in merged_grid:
+            print(" ".join(np.array(m)))
+    print()
+
+
+def make_row_disappear(dropped_pieces_grid):
+    new_grid = []
+    for i in dropped_pieces_grid:
+        if i == ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0']:
+            new_grid.insert(0, ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-'])
+        else:
+            new_grid.append(i)
+    count = 0
+    dropped = []
+    for row in new_grid:
+        for j in range(len(row)):
+            count += 1
+            if row[j] == '0':
+                dropped.append(count)
+    return new_grid, dropped
+
+
 dimensions = input().split()
 board_width = int(dimensions[0])
 board_height = int(dimensions[1])
 dropped_pieces = []
 grid = create_first_grid(board_width, board_height)
-
+status = ''
 while True:
-    commands = ['piece', 'break', 'exit']
-    command = input('Enter a command "piece", "break" or "exit": ')
+    commands = ['piece', 'break', 'exit', 'rotate', 'left', 'right', 'down']
+    if status == 'Game over':
+        break
+    command = input()
     if command not in commands:
         print('Such command does not exist')
     else:
         if command == 'exit':
             break
+        elif command == 'break':
+            grid_with_dropped = put_dropped_pieces_on_grid(dropped_pieces, board_width, board_height)
+            after_break_result = make_row_disappear(grid_with_dropped)
+            new_indeces = after_break_result[1]
+            broken = after_break_result[0]
+            for m in broken:
+                print(" ".join(np.array(m)))
+            print()
+            dropped_pieces = new_indeces
         elif command == 'piece':
             step = 0
             count = 0
             shape = interpret_input_piece()
-            first_piece = put_piece_on_grid(grid, shape[count])
-            for f in first_piece:
-                print(" ".join(np.array(f)))
+            print_out_grid(dropped_pieces, shape[count], grid)
             while True:
                 movements = ['rotate', 'left', 'right', 'down']
-                move = input("Select movement: ")
-                if move in movements:
-                    if violates_bottom_boundary(shape[count], step, board_width, board_height, dropped_pieces):
-                        shifted_piece = moved_piece(step, shape[count])
-                        dropped_pieces.append(shifted_piece)
-                        grid_with_dropped = put_dropped_pieces_on_grid(dropped_pieces, board_width, board_height)
-                        for i in grid_with_dropped:
-                            print(" ".join(np.array(i)))
-                        break
-                    else:
-                        if move == 'left' and not violates_left_boundary(shape[count], step, board_width):
-                            step += board_width - 1
-                        elif move == 'right' and not violates_right_boundary(shape[count], step, board_width):
-                            step += board_width + 1
-                        elif move == 'rotate':
-                            if (len(shape) - 1) > count:
-                                count += 1
-                            elif (len(shape) - 1) == count:
-                                count = 0
+                move = input()
+                if move == 'exit':
+                    status = 'Game over'
+                    break
+                else:
+                    if move in movements:
+                        if violates_bottom_boundary(shape[count], step, board_width, board_height, dropped_pieces):
+                            shifted_piece = moved_piece(step, shape[count])
+                            dropped_pieces.append(shifted_piece)
+                            if dropped_pieces[-1][0] < board_width:
+                                status = 'Game over'
+                                grid_with_dropped = put_dropped_pieces_on_grid(dropped_pieces, board_width, board_height)
+                                for i in grid_with_dropped:
+                                    print(" ".join(np.array(i)))
+                                print()
+                                print('Game Over!')
+                                break
+
+                            grid_with_dropped = put_dropped_pieces_on_grid(dropped_pieces, board_width, board_height)
+                            for i in grid_with_dropped:
+                                print(" ".join(np.array(i)))
+                            print()
+                            break
                         else:
-                            step += board_width
-                        shifted_piece = moved_piece(step, shape[count])
-                        moving_piece = put_piece_on_grid(grid, shifted_piece)
-                        if len(dropped_pieces) == 0:
-                            for h in moving_piece:
-                                print(" ".join(np.array(h)))
-                        else:
-                            fallen_pieces = put_dropped_pieces_on_grid(dropped_pieces, board_width, board_height)
-                            merged_grid = merge_two_grids(moving_piece, fallen_pieces)
-                            for m in merged_grid:
-                                print(" ".join(np.array(m)))
+                            if move == 'left' and not violates_left_boundary(shape[count], step, board_width):
+                                step += board_width - 1
+                            elif move == 'right' and not violates_right_boundary(shape[count], step, board_width):
+                                step += board_width + 1
+                            elif move == 'rotate':
+                                if (len(shape) - 1) > count:
+                                    count += 1
+                                elif (len(shape) - 1) == count:
+                                    count = 0
+                                step += board_width
+                            else:
+                                step += board_width
+                            shifted_piece = moved_piece(step, shape[count])
+                            print_out_grid(dropped_pieces, shifted_piece, grid)
+
